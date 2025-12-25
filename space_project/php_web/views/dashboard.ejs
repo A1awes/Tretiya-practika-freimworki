@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <!-- Подключаем Bootstrap из CDN для красоты -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: #2c3e50; color: white; padding: 20px 0; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🚀 Space Mission Control</h1>
+            <p>Monolithic Distributed System Dashboard</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Панель управления -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <input type="text" id="searchInput" class="form-control" placeholder="🔍 Поиск по источнику...">
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100" onclick="loadData()">🔄 Обновить данные</button>
+            </div>
+        </div>
+
+        <!-- Таблица данных -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Входящие данные телеметрии</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Источник</th>
+                            <th>Данные (JSON)</th>
+                            <th>Время получения</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="4" class="text-center">Загрузка данных...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('/api/proxy/data');
+                const data = await response.json();
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+
+                data.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.id}</td>
+                        <td><span class="badge bg-info text-dark">${item.source}</span></td>
+                        <td><small>${JSON.stringify(item.data).substring(0, 50)}...</small></td>
+                        <td>${new Date(item.fetched_at).toLocaleString()}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (e) {
+                console.error(e);
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" class="text-danger">Ошибка загрузки данных</td></tr>';
+            }
+        }
+        
+        // Загружаем данные при открытии страницы
+        loadData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+services:
+  # 1. База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: space_db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d space_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Наш Rust Бэкенд
+  rust_iss:
+    build: ./rust_iss
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://user:pass@db:5432/space_db
+    ports:
+      - "3005:3000"
+
+  # 3. Наш Фронтенд (Node.js/Laravel stub)
+  php_web:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./php_web:/app
+    command: sh -c "npm install && node server.js"
+    depends_on:
+      - rust_iss
+    environment:
+      RUST_SERVICE_URL: http://rust_iss:3000
+    ports:
+      - "8080:8080"

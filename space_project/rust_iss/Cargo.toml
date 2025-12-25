@@ -1,0 +1,19 @@
+[package]
+name = "rust_iss"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Основные библиотеки
+axum = "0.7.5"
+sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls", "postgres", "chrono"] }
+tokio = { version = "1.38", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+
+# !!! ПРИНУДИТЕЛЬНЫЕ СТАРЫЕ ВЕРСИИ (FIX)
+# Эти библиотеки в новых версиях сломаны для текущего Rust
+home = "=0.5.9"
+base64ct = "=1.6.0"
